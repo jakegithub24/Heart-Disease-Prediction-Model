@@ -1,0 +1,362 @@
+{% extends 'layout.html' %}
+
+{% block title %}HeartCare AI - Prediction Tool{% endblock %}
+
+{% block head %}
+<style>
+    .feature-input-group {
+        position: relative;
+    }
+
+    .feature-input-group input {
+        padding-right: 40px;
+    }
+
+    .feature-input-group .feature-unit {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        pointer-events: none;
+    }
+
+    .has-value input {
+        border-color: var(--primary-green);
+        background-color: rgba(43, 182, 115, 0.05);
+    }
+
+    .filled-example {
+        animation: highlight 1s ease;
+    }
+
+    @keyframes highlight {
+        0% {
+            background-color: rgba(43, 182, 115, 0.2);
+        }
+
+        100% {
+            background-color: transparent;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Prediction Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center fade-in">
+                <h1 class="display-5 mb-3">Heart Disease Prediction</h1>
+                <p class="lead text-muted">
+                    Enter clinical parameters below to assess heart disease risk using our AI model
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    <span class="badge badge-green">
+                        <i class="fas fa-shield-alt me-1"></i> Secure
+                    </span>
+                    <span class="badge badge-primary">
+                        <i class="fas fa-bolt me-1"></i> Instant Results
+                    </span>
+                    <span class="badge badge-accent">
+                        <i class="fas fa-lock me-1"></i> No Data Stored
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Display (if available) -->
+        {% if prediction_result %}
+        <div class="row mb-5 fade-in">
+            <div class="col-lg-8 mx-auto">
+                <div class="result-card glass p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div>
+                            {% if prediction_result.prediction == 0 %}
+                            <h3 class="text-success mb-2">
+                                <i class="fas fa-check-circle me-2"></i> Low Risk Detected
+                            </h3>
+                            <p class="text-muted mb-0">Based on the input parameters, no significant heart disease
+                                indicators were found.</p>
+                            {% else %}
+                            <h3 class="text-danger mb-2">
+                                <i class="fas fa-exclamation-triangle me-2"></i> Risk Detected
+                            </h3>
+                            <p class="text-muted mb-0">The analysis indicates potential heart disease risk factors.</p>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <div class="metric-value">
+                                {% if prediction_result.probability %}
+                                {{ (prediction_result.probability * 100)|round(1) }}%
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </div>
+                            <div class="metric-label">Risk Probability</div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="alert {% if prediction_result.prediction == 0 %}alert-success{% else %}alert-danger{% endif %}">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <i
+                                    class="fas fa-{% if prediction_result.prediction == 0 %}heart{% else %}stethoscope{% endif %} fa-2x"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="alert-heading">
+                                    {% if prediction_result.prediction == 0 %}
+                                    ✅ No Immediate Concern
+                                    {% else %}
+                                    ⚠️ Consultation Recommended
+                                    {% endif %}
+                                </h5>
+                                <p class="mb-0">
+                                    {% if prediction_result.prediction == 0 %}
+                                    While the analysis shows low risk, maintain regular check-ups and a healthy
+                                    lifestyle.
+                                    {% else %}
+                                    This result suggests consulting with a healthcare professional for comprehensive
+                                    assessment.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5 class="mb-3">Input Summary</h5>
+                        <div class="row g-3">
+                            {% for i in range(prediction_result.features|length) %}
+                            <div class="col-md-4 col-sm-6">
+                                <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                    <span class="text-muted">{{ prediction_result.features[i] }}</span>
+                                    <strong>{{ prediction_result.values[i] }}</strong>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <button onclick="window.location.reload()" class="btn btn-outline">
+                            <i class="fas fa-redo me-2"></i> New Prediction
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Prediction Form -->
+        <div class="row fade-in" style="animation-delay: 0.2s">
+            <div class="col-lg-8 mx-auto">
+                <div class="glass p-4">
+                    {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        {{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+
+                    <form id="predictForm" method="POST" action="{{ url_for('predict') }}">
+                        <div class="mb-4">
+                            <h4 class="mb-3">Clinical Parameters</h4>
+                            <p class="text-muted mb-4">
+                                Enter the following 13 clinical parameters. Each field accepts numeric values only.
+                            </p>
+                        </div>
+
+                        <div class="feature-grid mb-4">
+                            {% for feature in features %}
+                            <div class="feature-input-group">
+                                <label class="form-label">{{ feature }}</label>
+                                <input type="text" name="{{ feature }}" class="form-control feature-input"
+                                    placeholder="e.g., {{ example[feature] }}"
+                                    {% if prediction_result and feature in prediction_result.features %}
+                                    value="{{ prediction_result.values[prediction_result.features.index(feature)] }}"
+                                    {% endif %}>
+                                {% if 'age' in feature.lower() %}
+                                <span class="feature-unit">years</span>
+                                {% elif 'bp' in feature.lower() %}
+                                <span class="feature-unit">mmHg</span>
+                                {% elif 'chol' in feature.lower() %}
+                                <span class="feature-unit">mg/dl</span>
+                                {% elif 'thalach' in feature.lower() %}
+                                <span class="feature-unit">bpm</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <button type="button" id="fillExample" class="btn btn-outline"
+                                data-example="{{ example.values()|join(',') }}">
+                                <i class="fas fa-magic me-2"></i> Fill Example
+                            </button>
+                            <button type="button" id="clearForm" class="btn btn-outline">
+                                <i class="fas fa-eraser me-2"></i> Clear All
+                            </button>
+                            <button type="button" id="copyExample" class="btn btn-outline"
+                                data-example="{{ example.values()|join(', ') }}">
+                                <i class="fas fa-copy me-2"></i> Copy Example
+                            </button>
+                        </div>
+
+                        <!-- Quick Input Area -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-bolt me-2"></i> Quick Input
+                            </h5>
+                            <div class="alert alert-info">
+                                <p class="small mb-2">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    <strong>Pro tip:</strong> Paste all 13 values as comma-separated numbers
+                                </p>
+                                <textarea name="raw_input" class="form-control" rows="3"
+                                    placeholder="63, 1, 3, 145, 233, 1, 0, 150, 0, 2.3, 0, 0, 1"></textarea>
+                                <div class="mt-2 text-end">
+                                    <small class="text-muted">{{ features|length }} values expected</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Model Info -->
+                        <div class="glass p-3 mb-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h6 class="mb-2">Model Confidence</h6>
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar progress-bar-green"
+                                            style="width: {{ (test_acc * 100)|round(0) }}%">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">
+                                        Test Accuracy: <strong>{{ test_acc|percent(1) }}</strong>
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <span class="badge badge-dark mb-2">
+                                        <i class="fas fa-cogs me-1"></i> Logistic Regression
+                                    </span>
+                                    <p class="small text-muted mb-0">
+                                        Trained on UCI Heart Disease Dataset
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-play-circle me-2"></i> Analyze Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="row mt-5 fade-in" style="animation-delay: 0.4s">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-info-circle text-primary me-2"></i>
+                            About This Tool
+                        </h5>
+                        <p class="card-text">
+                            This prediction tool uses a Logistic Regression model trained on the
+                            UCI Heart Disease dataset. It analyzes 13 clinical parameters to
+                            provide risk assessment insights.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <strong>Real-time Analysis:</strong> Instant results
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <strong>Privacy First:</strong> No data storage
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <strong>Educational:</strong> For learning purposes
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            Important Notes
+                        </h5>
+                        <div class="alert alert-warning">
+                            <p class="small mb-0">
+                                <strong>Disclaimer:</strong> This tool is for educational and
+                                demonstration purposes only. It should not be used for medical
+                                diagnosis or treatment decisions. Always consult with qualified
+                                healthcare professionals for medical advice.
+                            </p>
+                        </div>
+                        <p class="small text-muted mb-0">
+                            <i class="fas fa-clock me-1"></i>
+                            Model last trained: Current session
+                            <br>
+                            <i class="fas fa-database me-1"></i>
+                            Dataset: UCI Heart Disease (303 samples)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const fillExampleBtn = document.getElementById('fillExample');
+    const clearBtn = document.getElementById('clearForm');
+    const copyBtn = document.getElementById('copyExample');
+    const textarea = document.querySelector('#predictForm textarea[name="raw_input"]');
+    const inputs = Array.from(document.querySelectorAll('#predictForm input.feature-input'));
+
+    if (fillExampleBtn) {
+        // data-example is set server-side for predictable ordering
+        const exampleStr = fillExampleBtn.getAttribute('data-example') || '';
+        fillExampleBtn.addEventListener('click', function () {
+            const parts = exampleStr.split(',');
+            inputs.forEach((el, i) => el.value = (parts[i] || '').trim());
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            inputs.forEach((el) => el.value = '');
+            if (textarea) textarea.value = '';
+        });
+    }
+
+    if (copyBtn && fillExampleBtn) {
+        copyBtn.addEventListener('click', function () {
+            const exampleStr = fillExampleBtn.getAttribute('data-example') || '';
+            navigator.clipboard.writeText(exampleStr).then(() => {
+                copyBtn.innerHTML = '<i class="fas fa-check me-2"></i> Copied';
+                setTimeout(() => copyBtn.innerHTML = '<i class="fas fa-copy me-2"></i> Copy Example', 1500);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

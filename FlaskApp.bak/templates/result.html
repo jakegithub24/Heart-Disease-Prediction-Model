@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="glass p-4 text-center result-card">
+        {% if error %}
+          <h3 class="text-warning">{{ error }}</h3>
+          <a class="btn btn-outline-light mt-3" href="{{ url_for('index') }}">Go back</a>
+        {% else %}
+          {% if prediction == 0 %}
+            <h2 class="text-success">No heart disease detected ✅</h2>
+          {% else %}
+            <h2 class="text-danger">Heart disease detected ❌</h2>
+          {% endif %}
+
+          {% if probability is not none %}
+            <p class="lead">Probability: <strong>{{ (probability * 100) | round(1) }}%</strong></p>
+          {% endif %}
+
+          <div class="mt-3 text-start">
+            <h6>Input values</h6>
+            <ul>
+              {% for i in range(features|length) %}
+                <li><strong>{{ features[i] }}</strong>: {{ values[i] }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div class="mt-3">
+            <span class="badge bg-success">Test acc: {{ test_acc|percent(2) }}</span>
+            <span class="badge bg-info">Train acc: {{ train_acc|percent(2) }}</span>
+          </div>
+
+          <div class="mt-3">
+            <a class="btn btn-outline-light" href="{{ url_for('index') }}">Try another</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

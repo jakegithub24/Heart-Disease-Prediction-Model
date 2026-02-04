@@ -1,0 +1,216 @@
+{% extends 'layout.html' %}
+
+{% block title %}HeartCare AI - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <div class="fade-in">
+          <h1 class="display-4 mb-4">Predict Heart Disease with AI Precision</h1>
+          <p class="lead mb-4">
+            Our advanced machine learning model analyzes clinical parameters to provide
+            early detection insights for heart disease risk assessment.
+          </p>
+          <div class="d-flex gap-3 mb-4">
+            <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg">
+              <i class="fas fa-play-circle me-2"></i> Start Prediction
+            </a>
+            <a href="#features" class="btn btn-outline btn-lg">
+              <i class="fas fa-info-circle me-2"></i> Learn More
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="glass p-4 fade-in" style="animation-delay: 0.2s">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="card-icon">
+              <i class="fas fa-heartbeat"></i>
+            </div>
+            <div>
+              <h3 class="mb-1">Model Performance</h3>
+              <p class="text-muted mb-0">Trained on clinical heart disease dataset</p>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="metric-card">
+                <div class="metric-label">Test Accuracy</div>
+                <div class="metric-value">{{ test_acc|percent(1) }}</div>
+                <p class="small text-muted mb-0">Real-world performance</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="metric-card">
+                <div class="metric-label">Training Accuracy</div>
+                <div class="metric-value">{{ train_acc|percent(1) }}</div>
+                <p class="small text-muted mb-0">Learning performance</p>
+              </div>
+            </div>
+          </div>
+
+          {% if report %}
+          <div class="mt-4">
+            <h5 class="mb-3">Model Metrics</h5>
+            <div class="row g-2">
+              <div class="col-6">
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Precision:</span>
+                  <strong>{{ (report['1']['precision'] * 100)|round(1) }}%</strong>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Recall:</span>
+                  <strong>{{ (report['1']['recall'] * 100)|round(1) }}%</strong>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">F1-Score:</span>
+                  <strong>{{ (report['1']['f1-score'] * 100)|round(1) }}%</strong>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="d-flex justify-content-between">
+                  <span class="text-muted">Specificity:</span>
+                  <strong>{{ (report['0']['recall'] * 100)|round(1) }}%</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5">
+  <div class="container">
+    <div class="text-center mb-5 fade-in">
+      <h2 class="mb-3">How It Works</h2>
+      <p class="lead text-muted">Three simple steps to get your heart health insights</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4 fade-in" style="animation-delay: 0.1s">
+        <div class="card h-100 p-4">
+          <div class="card-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <h4 class="mb-3">1. Input Clinical Data</h4>
+          <p class="text-muted">
+            Enter 13 clinical parameters including age, cholesterol levels,
+            blood pressure, and other vital metrics.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4 fade-in" style="animation-delay: 0.2s">
+        <div class="card h-100 p-4">
+          <div class="card-icon">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h4 class="mb-3">2. AI Analysis</h4>
+          <p class="text-muted">
+            Our trained Logistic Regression model processes your data
+            using patterns learned from thousands of cases.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4 fade-in" style="animation-delay: 0.3s">
+        <div class="card h-100 p-4">
+          <div class="card-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h4 class="mb-3">3. Get Results</h4>
+          <p class="text-muted">
+            Receive instant predictions with probability scores
+            and detailed explanations of the results.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-gradient"
+  style="background: linear-gradient(135deg, rgba(43, 182, 115, 0.1), rgba(43, 182, 115, 0.05))">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8 mb-4 mb-lg-0">
+        <h3 class="mb-3">Ready to assess heart disease risk?</h3>
+        <p class="lead mb-0">
+          Get instant AI-powered predictions based on clinical parameters.
+          No personal data is stored - your privacy is protected.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <a href="{{ url_for('predict') }}" class="btn btn-primary btn-lg px-5">
+          <i class="fas fa-rocket me-2"></i> Try Predictor
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features List -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <h3 class="mb-4">Clinical Parameters Analyzed</h3>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <ul class="list-unstyled">
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Age</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Sex</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Chest Pain Type</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Resting BP</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Cholesterol</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Fasting Blood Sugar</li>
+            </ul>
+          </div>
+          <div class="col-sm-6">
+            <ul class="list-unstyled">
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Resting ECG</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Max Heart Rate</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Exercise Angina</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> ST Depression</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> ST Slope</li>
+              <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Major Vessels</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="glass p-4">
+          <h4 class="mb-3">Important Disclaimer</h4>
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>For Educational Use Only</strong>
+            <p class="mb-0 small mt-2">
+              This prediction tool is designed for demonstration and educational purposes.
+              It should not be used as a substitute for professional medical advice,
+              diagnosis, or treatment. Always seek the advice of your physician or
+              other qualified health provider with any questions you may have regarding
+              a medical condition.
+            </p>
+          </div>
+          <p class="small text-muted mb-0">
+            <i class="fas fa-shield-alt me-1"></i>
+            All calculations are performed securely and no personal data is stored or shared.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

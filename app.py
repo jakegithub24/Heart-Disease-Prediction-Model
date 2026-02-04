@@ -61,9 +61,9 @@ if input_text:
                 st.metric("Disease probability", f"{prob*100:.1f}%")
 
             if prediction == 0:
-                st.success(f"No heart disease detected ✅{prob_text}")
+                st.success(f"🟢 No heart disease detected 🟢 {prob_text}")
             else:
-                st.error(f"Heart disease detected ❌{prob_text}")
+                st.error(f"🔴 Heart disease detected 🔴 {prob_text}")
 
             st.info(f"Model accuracy — Test: {test_data_accuracy:.2%}, Train: {training_data_accuracy:.2%}")
 

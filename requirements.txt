@@ -1,4 +1,9 @@
+# Streamlit App Dependencies
 numpy
 pandas
 scikit-learn
 streamlit
+
+# Flask App Dependencies
+Flask
+gunicorn
