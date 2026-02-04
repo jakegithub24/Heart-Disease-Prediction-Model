@@ -22,7 +22,10 @@ The application provides:
 ## Tech Used
 
 - **Python 3.8+**
-- **Streamlit** - Web application framework
+- **Streamlit** - Web application framework (original demo)
+- **Flask** - Lightweight WSGI web framework (production/demo web app in `FlaskApp/`)
+- **Jinja2** - Template engine used by Flask
+- **Gunicorn** - Production WSGI server (recommended for production deployments)
 - **Scikit-learn** - Machine learning library (Logistic Regression)
 - **Pandas** - Data manipulation and analysis
 - **NumPy** - Numerical computing
@@ -90,6 +93,40 @@ The application provides:
 
 6. Open your browser and go to `http://localhost:8501`
 
+---
+
+## Flask App (Local / Demo)
+
+A Flask port of the Streamlit demo is included in the `FlaskApp/` directory. The Flask app trains a Logistic Regression model on startup (using the same `heart_disease_data.csv`) and serves a small web UI with the following routes:
+
+- `/` - Landing page with model metrics
+- `/predict` - Form to enter feature values and get a prediction
+- `/assets/<file>` - Static assets (icons/images)
+
+### Quick start (Linux)
+
+```bash
+cd FlaskApp
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python app.py
+# open http://127.0.0.1:5001
+```
+
+### Production (example using Gunicorn)
+
+```bash
+cd FlaskApp
+pip install -r requirements.txt
+# run with gunicorn (bind to port 8000 for example):
+gunicorn -w 4 -b 0.0.0.0:8000 "app:app"
+```
+
+**Notes:**
+- The Flask app runs on port `5001` by default when started with `python app.py`.
+- Update `app.config['SECRET_KEY']` in `FlaskApp/app.py` before deploying to production.
+
 ## Future Improvements to be Done
 
 - [ ] Add more machine learning models (Random Forest, SVM, Neural Networks) for comparison
@@ -103,7 +140,7 @@ The application provides:
 - [ ] Add unit tests for model and UI components
 - [ ] Implement hyperparameter tuning
 - [ ] Add support for batch predictions via file upload
-- [ ] Build a Flask app for production deployment
+- [x] Add a Flask app for local/demo use (see `FlaskApp/`) — next: containerize and deploy with Gunicorn + Nginx
 
 ## Contribution
 
