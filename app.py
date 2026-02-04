@@ -28,25 +28,24 @@ X_test_prediction = model.predict(X_test)
 test_data_accuracy = accuracy_score(X_test_prediction, Y_test)
 
 # web app
-st.title('Heart Disease Preidction Model')
+st.title('Heart Disease Prediction Model')
 
 input_text = st.text_input('Provide comma separated features to predict heart disease')
-sprted_input = input_text.split(',')
-img = Image.open('heart_img.jpg')
+img = Image.open('heart_img.jpeg')
 st.image(img,width=150)
 
-
-try:
-    np_df = np.asarray(sprted_input,dtype=float)
-    reshaped_df = np_df.reshape(1,-1)
-    prediction = model.predict(reshaped_df)
-    if prediction[0] == 0:
-        st.write("This person don't have a heart disease")
-    else:
-        st.write("this person have heart disease")
-
-except ValueError:
-    st.write('Please provide comma seprated values')
+if input_text:
+    split_input = input_text.split(',')
+    try:
+        np_df = np.asarray(split_input, dtype=float)
+        reshaped_df = np_df.reshape(1, -1)
+        prediction = model.predict(reshaped_df)
+        if prediction[0] == 0:
+            st.write("This person doesn't have a heart disease")
+        else:
+            st.write("This person has heart disease")
+    except ValueError:
+        st.write('Please provide comma separated values')
 
 st.subheader("About Data")
 st.write(heart_data)
