@@ -1,261 +1,166 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // Theme Toggle
+// Add to existing script.js
+
+// Dark Mode Toggle
+function initThemeToggle() {
     const themeToggle = document.getElementById('themeToggle');
-    const currentTheme = localStorage.getItem('theme') || 'light';
+    const html = document.documentElement;
+    
+    // Get saved theme preference from localStorage
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+    
+    // Theme toggle click handler
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            // Update HTML attribute
+            html.setAttribute('data-theme', newTheme);
+            
+            // Save preference to localStorage
+            localStorage.setItem('theme', newTheme);
+            
+            // Update icon
+            updateThemeIcon(newTheme);
+        });
+    }
+}
 
-    // Set initial theme
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    updateThemeIcon(currentTheme);
-
-    // Theme toggle event
-    themeToggle.addEventListener('click', function () {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-        // Smooth transition
-        document.documentElement.style.transition = 'all 0.3s ease';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-
-        updateThemeIcon(newTheme);
-
-        // Remove transition after animation
-        setTimeout(() => {
-            document.documentElement.style.transition = '';
-        }, 300);
-    });
-
-    function updateThemeIcon(theme) {
+function updateThemeIcon(theme) {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
         const icon = themeToggle.querySelector('i');
-        if (theme === 'dark') {
-            icon.className = 'fas fa-sun';
-            themeToggle.setAttribute('title', 'Switch to light mode');
-        } else {
-            icon.className = 'fas fa-moon';
-            themeToggle.setAttribute('title', 'Switch to dark mode');
+        if (icon) {
+            if (theme === 'dark') {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
         }
     }
+}
 
-    // Fill Example Values
-    const fillExampleBtn = document.getElementById('fillExample');
-    const clearFormBtn = document.getElementById('clearForm');
+// Time ago function for audit log
+function timeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+    
+    return Math.floor(seconds) + " seconds ago";
+}
 
-    if (fillExampleBtn) {
-        fillExampleBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            // Get all input fields
-            const inputs = document.querySelectorAll('.feature-input-group input');
-            const exampleValues = fillExampleBtn.dataset.example?.split(',') || [];
-
-            inputs.forEach((input, index) => {
-                if (exampleValues[index]) {
-                    input.value = exampleValues[index].trim();
-                    // Add animation
-                    input.classList.add('filled-example');
-                    setTimeout(() => {
-                        input.classList.remove('filled-example');
-                    }, 1000);
-                }
-            });
-
-            // Show feedback
-            showToast('Example values filled successfully!', 'success');
-        });
+// Format JSON for display
+function formatJSON(jsonString) {
+    try {
+        const obj = JSON.parse(jsonString);
+        return JSON.stringify(obj, null, 2);
+    } catch {
+        return jsonString;
     }
+}
 
-    if (clearFormBtn) {
-        clearFormBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            // Clear all input fields
-            document.querySelectorAll('.feature-input-group input').forEach(input => {
-                input.value = '';
-                input.classList.add('cleared');
-                setTimeout(() => {
-                    input.classList.remove('cleared');
-                }, 500);
-            });
-
-            // Clear textarea
-            const textarea = document.querySelector('textarea[name="raw_input"]');
-            if (textarea) textarea.value = '';
-
-            showToast('Form cleared!', 'info');
-        });
-    }
-
-    // Form Submission Animation
-    const predictForm = document.getElementById('predictForm');
-    if (predictForm) {
-        predictForm.addEventListener('submit', function (e) {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-
-            // Disable button and show loading
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        Analyzing...
-      `;
-
-            // Add loading animation to form
-            this.classList.add('processing');
-
-            // Simulate processing animation
-            const inputs = this.querySelectorAll('.form-control');
-            inputs.forEach((input, index) => {
-                setTimeout(() => {
-                    input.classList.add('processing-input');
-                }, index * 100);
-            });
-
-            // Re-enable after 3 seconds (in case of error)
-            setTimeout(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-                predictForm.classList.remove('processing');
-                inputs.forEach(input => input.classList.remove('processing-input'));
-            }, 3000);
-        });
-    }
-
-    // Animate elements on scroll
-    function animateOnScroll() {
-        const elements = document.querySelectorAll('.fade-in');
-
-        elements.forEach(element => {
-            const elementTop = element.getBoundingClientRect().top;
-            const elementVisible = 150;
-
-            if (elementTop < window.innerHeight - elementVisible) {
-                element.classList.add('animated');
-            }
-        });
-    }
-
-    // Initialize scroll animation
-    window.addEventListener('scroll', animateOnScroll);
-    animateOnScroll(); // Run once on load
-
-    // Auto-format feature inputs
-    const featureInputs = document.querySelectorAll('.feature-input');
-    featureInputs.forEach(input => {
-        input.addEventListener('input', function (e) {
-            // Remove non-numeric characters except decimal point
-            let value = this.value.replace(/[^0-9.]/g, '');
-
-            // Ensure only one decimal point
-            const parts = value.split('.');
-            if (parts.length > 2) {
-                value = parts[0] + '.' + parts.slice(1).join('');
-            }
-
-            this.value = value;
-
-            // Visual feedback
-            if (value) {
-                this.parentElement.classList.add('has-value');
-            } else {
-                this.parentElement.classList.remove('has-value');
-            }
-        });
-
-        // Focus animation
-        input.addEventListener('focus', function () {
-            this.parentElement.classList.add('focused');
-        });
-
-        input.addEventListener('blur', function () {
-            this.parentElement.classList.remove('focused');
-        });
-    });
-
-    // Copy to clipboard functionality
-    const copyExampleBtn = document.getElementById('copyExample');
-    if (copyExampleBtn) {
-        copyExampleBtn.addEventListener('click', function () {
-            const exampleText = this.dataset.example;
-            navigator.clipboard.writeText(exampleText)
-                .then(() => {
-                    const originalHTML = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    this.classList.add('copied');
-
-                    setTimeout(() => {
-                        this.innerHTML = originalHTML;
-                        this.classList.remove('copied');
-                    }, 2000);
-
-                    showToast('Example copied to clipboard!', 'success');
-                })
-                .catch(err => {
-                    showToast('Failed to copy to clipboard', 'error');
-                });
-        });
-    }
-
-    // Toast notification function
-    function showToast(message, type = 'info') {
-        // Remove existing toasts
-        const existingToasts = document.querySelectorAll('.toast-container');
-        existingToasts.forEach(toast => toast.remove());
-
-        // Create toast container
-        const toastContainer = document.createElement('div');
-        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-        toastContainer.style.zIndex = '1050';
-
-        // Create toast element
-        const toast = document.createElement('div');
-        toast.className = `toast show align-items-center text-bg-${type} border-0`;
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
-
-        toast.innerHTML = `
-      <div class="d-flex">
-        <div class="toast-body">
-          <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
-          ${message}
-        </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-      </div>
-    `;
-
-        toastContainer.appendChild(toast);
-        document.body.appendChild(toastContainer);
-
-        // Auto remove after 3 seconds
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                toastContainer.remove();
-            }, 300);
-        }, 3000);
-    }
-
-    // Initialize tooltips
+// Initialize tooltips
+function initTooltips() {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
+}
 
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
+// Password strength checker
+function checkPasswordStrength(password) {
+    let strength = 0;
+    
+    if (password.length >= 8) strength++;
+    if (password.match(/[a-z]+/)) strength++;
+    if (password.match(/[A-Z]+/)) strength++;
+    if (password.match(/[0-9]+/)) strength++;
+    if (password.match(/[$@#&!]+/)) strength++;
+    
+    return strength;
+}
 
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
+// Form validation
+function validatePatientForm() {
+    const requiredFields = document.querySelectorAll('input[required], select[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    });
+    
+    return isValid;
+}
 
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 80,
-                    behavior: 'smooth'
-                });
+// Add to DOMContentLoaded event
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize theme toggle
+    initThemeToggle();
+    
+    // ... existing code ...
+    
+    // Initialize tooltips
+    initTooltips();
+    
+    // Form validation
+    const forms = document.querySelectorAll('form[needs-validation]');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!validatePatientForm()) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Scroll to first invalid field
+                const firstInvalid = this.querySelector('.is-invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                }
+                
+                showToast('Please fill in all required fields', 'warning');
             }
+        });
+    });
+    
+    // Auto-format phone numbers
+    const phoneInputs = document.querySelectorAll('input[type="tel"]');
+    phoneInputs.forEach(input => {
+        input.addEventListener('input', function(e) {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 10) value = value.substring(0, 10);
+            
+            if (value.length > 6) {
+                value = value.substring(0, 3) + '-' + value.substring(3, 6) + '-' + value.substring(6);
+            } else if (value.length > 3) {
+                value = value.substring(0, 3) + '-' + value.substring(3);
+            }
+            
+            this.value = value;
         });
     });
 });

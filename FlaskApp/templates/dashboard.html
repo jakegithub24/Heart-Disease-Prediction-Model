@@ -1,0 +1,290 @@
+{% extends 'layout.html' %}
+
+{% block title %}HeartCare AI - Dashboard{% endblock %}
+
+{% block head %}
+<style>
+    .stat-card {
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">Welcome, {{ session.full_name }}!</h1>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-user-tag me-1"></i>
+                        {{ session.role|title }} Account • Last login: {{ "Today" }}
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('new_patient') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i> New Patient
+                    </a>
+                    <a href="{{ url_for('profile') }}" class="btn btn-outline">
+                        <i class="fas fa-user-cog me-2"></i> Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="stat-card glass"
+                style="background: linear-gradient(135deg, rgba(43, 182, 115, 0.1), rgba(43, 182, 115, 0.05));">
+                <div class="stat-icon"
+                    style="background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value">{{ stats.total_patients or 0 }}</div>
+                <div class="stat-label">Total Patients</div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="stat-card glass"
+                style="background: linear-gradient(135deg, rgba(255, 176, 32, 0.1), rgba(255, 176, 32, 0.05));">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ffb020, #e69500);">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="stat-value">{{ stats.high_risk or 0 }}</div>
+                <div class="stat-label">High Risk Cases</div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="stat-card glass"
+                style="background: linear-gradient(135deg, rgba(29, 155, 240, 0.1), rgba(29, 155, 240, 0.05));">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #1d9bf0, #0c7abf);">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="stat-value">{{ stats.low_risk or 0 }}</div>
+                <div class="stat-label">Low Risk Cases</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-bolt me-2"></i> Quick Actions
+                    </h5>
+                    <div class="row g-2">
+                        <div class="col-auto">
+                            <a href="{{ url_for('new_patient') }}" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i> Add Patient
+                            </a>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ url_for('patients') }}" class="btn btn-outline">
+                                <i class="fas fa-list me-2"></i> View All Patients
+                            </a>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ url_for('predict') }}" class="btn btn-outline">
+                                <i class="fas fa-stethoscope me-2"></i> Quick Prediction
+                            </a>
+                        </div>
+                        {% if session.role == 'admin' %}
+                        <div class="col-auto">
+                            <a href="{{ url_for('manage_users') }}" class="btn btn-outline">
+                                <i class="fas fa-users-cog me-2"></i> Manage Staff
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Patients -->
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i> Recent Patients
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>Name</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                    <th>Risk Level</th>
+                                    <th>Date Added</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in recent_patients %}
+                                <tr>
+                                    <td><strong>{{ patient.patient_id }}</strong></td>
+                                    <td>{{ patient.full_name }}</td>
+                                    <td>{{ patient.age }}</td>
+                                    <td>{{ patient.gender or 'N/A' }}</td>
+                                    <td>
+                                        {% if patient.prediction_result == 1 %}
+                                        <span class="badge badge-danger">High Risk</span>
+                                        {% else %}
+                                        <span class="badge badge-success">Low Risk</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ patient.created_at[:10] }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('patient_detail', id=patient.id) }}"
+                                                class="btn btn-outline">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('edit_patient', id=patient.id) }}"
+                                                class="btn btn-outline">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <i class="fas fa-users fa-2x text-muted mb-3"></i>
+                                        <p class="text-muted">No patients found</p>
+                                        <a href="{{ url_for('new_patient') }}" class="btn btn-primary">
+                                            <i class="fas fa-user-plus me-2"></i> Add First Patient
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a href="{{ url_for('patients') }}" class="btn btn-outline">
+                        <i class="fas fa-list me-2"></i> View All Patients
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-chart-line me-2"></i> Model Performance
+                    </h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-muted">Test Accuracy</span>
+                                    <strong>{{ test_acc|percent(1) }}</strong>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar progress-bar-green" style="width: {{ test_acc * 100 }}%">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-muted">Training Accuracy</span>
+                                    <strong>{{ train_acc|percent(1) }}</strong>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar progress-bar-green" style="width: {{ train_acc * 100 }}%">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Model trained on UCI Heart Disease dataset with {{ FEATURES|length }} parameters
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-shield-alt me-2"></i> System Status
+                    </h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <span>Database: Connected</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <span>Model: Loaded and Ready</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <span>Authentication: Active</span>
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-user-check me-2"></i>
+                            <span>Logged in as: {{ session.username }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

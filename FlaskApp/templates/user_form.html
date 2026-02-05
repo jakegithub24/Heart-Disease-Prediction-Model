@@ -1,0 +1,126 @@
+{% extends 'layout.html' %}
+
+{% block title %}{% if user %}Edit{% else %}New{% endif %} User - HeartCare AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2">
+                        {% if user %}
+                        <i class="fas fa-user-edit me-2"></i> Edit Staff Account
+                        {% else %}
+                        <i class="fas fa-user-plus me-2"></i> New Staff Account
+                        {% endif %}
+                    </h1>
+                    <p class="text-muted mb-0">
+                        {% if user %}
+                        Update staff account information
+                        {% else %}
+                        Create a new hospital staff account
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <a href="{{ url_for('manage_users') }}" class="btn btn-outline">
+                        <i class="fas fa-arrow-left me-2"></i> Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Username *</label>
+                            <input type="text" name="username" class="form-control" 
+                                   value="{{ user.username if user else '' }}" 
+                                   {% if user %}readonly{% else %}required{% endif %}>
+                            <div class="form-text">
+                                Must be unique. Cannot be changed after creation.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" name="full_name" class="form-control" 
+                                   value="{{ user.full_name if user else '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control" 
+                                   value="{{ user.email if user else '' }}">
+                        </div>
+                        
+                        {% if user %}
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" 
+                                       name="is_active" id="is_active" 
+                                       {% if user.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">
+                                    Account Active
+                                </label>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label">
+                                {% if user %}New Password{% else %}Password *{% endif %}
+                            </label>
+                            <input type="password" name="password" class="form-control"
+                                   {% if not user %}required{% endif %}>
+                            <div class="form-text">
+                                {% if user %}
+                                Leave blank to keep current password
+                                {% else %}
+                                Minimum 6 characters
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if not user %}
+                        <div class="mb-4">
+                            <label class="form-label">Confirm Password *</label>
+                            <input type="password" name="confirm_password" class="form-control" required>
+                        </div>
+                        {% endif %}
+                        
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('manage_users') }}" class="btn btn-outline">
+                                <i class="fas fa-times me-2"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if user %}Update Account{% else %}Create Account{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Info Box -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-info-circle me-2"></i> Staff Account Information
+                    </h6>
+                    <ul class="small text-muted mb-0">
+                        <li>Staff accounts can create, edit, and delete patient records</li>
+                        <li>Staff cannot access admin functions or other staff's patients</li>
+                        <li>All actions are logged in the audit trail</li>
+                        <li>Inactive accounts cannot login but their data is preserved</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

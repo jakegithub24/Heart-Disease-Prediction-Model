@@ -1,0 +1,100 @@
+[
+  {
+    "test": "Flask App Connection",
+    "passed": true,
+    "message": "Status Code: 200",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:49.940530"
+  },
+  {
+    "test": "Home Page Load",
+    "passed": true,
+    "message": "Status Code: 200",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:49.946013"
+  },
+  {
+    "test": "Login Page Load",
+    "passed": true,
+    "message": "Status Code: 200",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:49.955344"
+  },
+  {
+    "test": "Login with Invalid Credentials",
+    "passed": true,
+    "message": "Status Code: 200",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:49.963765"
+  },
+  {
+    "test": "Login with Valid Credentials (ADMIN)",
+    "passed": true,
+    "message": "Successfully logged in as admin",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:50.142648"
+  },
+  {
+    "test": "Dashboard Access",
+    "passed": true,
+    "message": "Logged in as: admin",
+    "status_code": 200,
+    "timestamp": "2026-02-06T00:32:50.148518"
+  },
+  {
+    "test": "Patients List Access",
+    "passed": true,
+    "message": "Logged in as: admin",
+    "status_code": 200,
+    "timestamp": "2026-02-06T00:32:50.153713"
+  },
+  {
+    "test": "Predict Page Access",
+    "passed": true,
+    "message": "Status Code: 200",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:50.158927"
+  },
+  {
+    "test": "API Patient Stats",
+    "passed": true,
+    "message": "Status Code: 200, Data: {'daily_stats': [], 'risk_distribution': []}",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:50.164823"
+  },
+  {
+    "test": "Profile Page Access",
+    "passed": true,
+    "message": "Status Code: 200",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:50.170690"
+  },
+  {
+    "test": "Admin Users Page Access",
+    "passed": true,
+    "message": "User role: admin",
+    "status_code": 200,
+    "timestamp": "2026-02-06T00:32:50.179858"
+  },
+  {
+    "test": "Audit Log Page Access",
+    "passed": true,
+    "message": "Status Code: 200",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:50.188945"
+  },
+  {
+    "test": "Non-existent Patient Access",
+    "passed": true,
+    "message": "App handles non-existent patient gracefully",
+    "status_code": 200,
+    "timestamp": "2026-02-06T00:32:50.206441"
+  },
+  {
+    "test": "Logout",
+    "passed": true,
+    "message": "Status Code: 200",
+    "status_code": null,
+    "timestamp": "2026-02-06T00:32:50.222585"
+  }
+]

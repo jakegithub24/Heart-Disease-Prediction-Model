@@ -1,0 +1,228 @@
+{% extends 'layout.html' %}
+
+{% block title %}HeartCare AI - Patients{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">Patient Management</h1>
+                    <p class="text-muted mb-0">Manage and monitor patient records</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('new_patient') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i> Add New Patient
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control" 
+                                       placeholder="Search by name, patient ID, or contact number..."
+                                       value="{{ search }}">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline dropdown-toggle" 
+                                        data-bs-toggle="dropdown">
+                                    <i class="fas fa-filter me-2"></i> Filter
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">All Patients</a></li>
+                                    <li><a class="dropdown-item" href="#">High Risk Only</a></li>
+                                    <li><a class="dropdown-item" href="#">Low Risk Only</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">Today's Records</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients Table -->
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i> Patient Records
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>Full Name</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                    <th>Contact</th>
+                                    <th>Risk Level</th>
+                                    <th>Probability</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in patients %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ patient.patient_id }}</strong>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-2">
+                                                <div class="avatar-initial bg-light rounded">
+                                                    {{ patient.full_name[0]|upper }}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <strong>{{ patient.full_name }}</strong>
+                                                {% if patient.email %}
+                                                <br><small class="text-muted">{{ patient.email }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ patient.age }}</td>
+                                    <td>{{ patient.gender or 'N/A' }}</td>
+                                    <td>{{ patient.contact_number or 'N/A' }}</td>
+                                    <td>
+                                        {% if patient.prediction_result == 1 %}
+                                        <span class="badge badge-danger">High Risk</span>
+                                        {% else %}
+                                        <span class="badge badge-success">Low Risk</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if patient.prediction_probability %}
+                                        {{ (patient.prediction_probability * 100)|round(1) }}%
+                                        {% else %}
+                                        N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ patient.created_at[:10] }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('patient_detail', id=patient.id) }}" 
+                                               class="btn btn-outline" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('edit_patient', id=patient.id) }}" 
+                                               class="btn btn-outline" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteModal{{ patient.id }}"
+                                                    title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ patient.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Confirm Delete</h5>
+                                                        <button type="button" class="btn-close" 
+                                                                data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete patient 
+                                                           <strong>{{ patient.full_name }}</strong> 
+                                                           ({{ patient.patient_id }})?</p>
+                                                        <div class="alert alert-warning">
+                                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                                            This action cannot be undone.
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-outline" 
+                                                                data-bs-dismiss="modal">Cancel</button>
+                                                        <form method="POST" 
+                                                              action="{{ url_for('delete_patient', id=patient.id) }}">
+                                                            <button type="submit" class="btn btn-danger">
+                                                                <i class="fas fa-trash me-2"></i> Delete
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="9" class="text-center py-5">
+                                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                        <h5 class="text-muted">No patients found</h5>
+                                        {% if search %}
+                                        <p class="mb-3">Try a different search term</p>
+                                        {% else %}
+                                        <p class="mb-3">Start by adding your first patient</p>
+                                        {% endif %}
+                                        <a href="{{ url_for('new_patient') }}" class="btn btn-primary">
+                                            <i class="fas fa-user-plus me-2"></i> Add New Patient
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                {% if total_pages > 1 %}
+                <div class="card-footer">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                                <a class="page-link" href="?page={{ page-1 }}&search={{ search }}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            
+                            {% for p in range(1, total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a class="page-link" href="?page={{ p }}&search={{ search }}">{{ p }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                                <a class="page-link" href="?page={{ page+1 }}&search={{ search }}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

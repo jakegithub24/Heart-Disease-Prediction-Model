@@ -1,0 +1,183 @@
+{% extends 'layout.html' %}
+
+{% block title %}My Profile - HeartCare AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2">My Profile</h1>
+                    <p class="text-muted mb-0">Manage your account settings and preferences</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                        <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <!-- Basic Information -->
+                        <h5 class="mb-4">
+                            <i class="fas fa-user-circle me-2"></i> Basic Information
+                        </h5>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                                <div class="form-text">Username cannot be changed</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Role</label>
+                                <input type="text" class="form-control" value="{{ user.role|title }}" readonly>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}"
+                                    required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" name="email" class="form-control" value="{{ user.email }}">
+                            </div>
+                        </div>
+
+                        <!-- Password Change -->
+                        <h5 class="mb-4">
+                            <i class="fas fa-key me-2"></i> Password Change
+                        </h5>
+
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Leave password fields blank if you don't want to change your password
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Current Password</label>
+                                <input type="password" name="current_password" class="form-control">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">New Password</label>
+                                <input type="password" name="new_password" class="form-control">
+                                <div class="form-text">Minimum 6 characters</div>
+                            </div>
+                        </div>
+
+                        <!-- Account Information -->
+                        <h5 class="mb-4">
+                            <i class="fas fa-info-circle me-2"></i> Account Information
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Account Created</label>
+                                <input type="text" class="form-control" value="{{ user.created_at[:10] }}" readonly>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Login</label>
+                                <input type="text" class="form-control"
+                                    value="{% if user.last_login %}{{ user.last_login[:16] }}{% else %}Never{% endif %}"
+                                    readonly>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Account Status</label>
+                                <input type="text" class="form-control"
+                                    value="{% if user.is_active %}Active{% else %}Inactive{% endif %}" readonly>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                                <i class="fas fa-times me-2"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i> Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card border-danger mt-4">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Danger Zone
+                    </h5>
+                    <p class="card-text text-muted">
+                        Be careful with these actions. They cannot be undone.
+                    </p>
+
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+
+                        {% if session.role == 'admin' %}
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                            data-bs-target="#deleteAccountModal">
+                            <i class="fas fa-trash me-2"></i> Delete Account
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal (for admin only) -->
+{% if session.role == 'admin' %}
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete your account?</p>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This will permanently delete your admin account.
+                    This action cannot be undone and may affect system functionality.
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDelete">
+                    <label class="form-check-label" for="confirmDelete">
+                        I understand this action cannot be undone
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" disabled>
+                    <i class="fas fa-trash me-2"></i> Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('confirmDelete').addEventListener('change', function () {
+        document.querySelector('#deleteAccountModal .btn-danger').disabled = !this.checked;
+    });
+</script>
+{% endif %}
+{% endblock %}
